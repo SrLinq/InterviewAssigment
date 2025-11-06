@@ -39,6 +39,7 @@ export class ProductService {
     this.subCategoryRepository = AppDataSource.getRepository(SubCategory);
   }
 
+  // Find all products belonging to a specific sub-category id.
   async searchBySubCategory(id: number): Promise<Product[] | null> {
     const subCategory = await this.subCategoryRepository.findOne({
       where: { id },
@@ -51,10 +52,12 @@ export class ProductService {
     return this.repository.findBy({ subCategory: { id: subCategory.id } });
   }
 
+  // Retrieve every product in the catalog.
   async getProducts(): Promise<Product[]> {
     return this.repository.find();
   }
 
+  // Locate products by top-level category.
   async searchByCategory(id: number): Promise<Product[] | null> {
     const category = await this.categoryRepository.findOneBy({ id: id });
     if (!category) {
@@ -64,13 +67,16 @@ export class ProductService {
     return this.repository.findBy({ category: { id: category.id } });
   }
 
+  // Generic lookup helpers for search endpoints.
   async searchById(id: number): Promise<Product | null> {
-    return await this.repository.findOne({ where: { id } });
+    return this.repository.findOne({ where: { id } });
   }
 
-  async searchByName(name: string): Promise<Product| null> {
-    return await this.repository.findOne({ where: { name } });
+  async searchByName(name: string): Promise<Product | null> {
+    return this.repository.findOne({ where: { name } });
   }
+
+  // Create a product while enforcing business rules around tax and pricing.
   async createProduct(input: CreateProductInput): Promise<Product> {
     const name = input.name?.trim();
     if (!name) {
@@ -166,6 +172,8 @@ export class ProductService {
       subCategory: subCategory || undefined,
     });
   }
+
+  // Update a product and reconcile relationships, tax, and pricing.
   async updateProduct(id: number, input: UpdateProductInput): Promise<Product> {
     const product = await this.repository.findOne({
       where: { id },

@@ -124,6 +124,7 @@ productRouter.get("/search", async (req, res, next) => {
   }
 });
 
+// Modify an existing product and return the updated representation.
 productRouter.put("/:id", async (req, res, next) => {
   try {
     const id = Number(req.params.id);
@@ -138,6 +139,7 @@ productRouter.put("/:id", async (req, res, next) => {
   }
 });
 
+// Fetch the complete catalog of products.
 productRouter.get("/", async (req, res, next) => {
   try {
     const products = await productService.getProducts();
@@ -147,6 +149,7 @@ productRouter.get("/", async (req, res, next) => {
   }
 });
 
+// Create a new product entry.
 productRouter.post("/", async (req, res, next) => {
   try {
     const product = await productService.createProduct(req.body);

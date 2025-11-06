@@ -30,6 +30,7 @@ export class SubCategoryService {
     this.categoryRepository = AppDataSource.getRepository(Category);
   }
 
+  // Persist a sub-category and inherit defaults from its parent category.
   async createSubCategory(
     input: CreateSubCategoryInput
   ): Promise<SubCategory> {
@@ -79,17 +80,21 @@ export class SubCategoryService {
       category,
     });
   }
-  async getSubCategories(): Promise<SubCategory[]>{
-    return await this.repository.find()
+
+  // Return every sub-category regardless of parent category.
+  async getSubCategories(): Promise<SubCategory[]> {
+    return this.repository.find();
   }
 
-    async searchById(id: number): Promise<SubCategory | null> {
-    return await this.repository.findOne({ where: { id } });
+  // Look up sub-categories by different criteria to support router searches.
+  async searchById(id: number): Promise<SubCategory | null> {
+    return this.repository.findOne({ where: { id } });
   }
 
   async searchByName(name: string): Promise<SubCategory | null> {
-    return await this.repository.findOne({ where: { name } });
+    return this.repository.findOne({ where: { name } });
   }
+
   async searchByCategory(id: number): Promise<SubCategory[] | null> {
     const category = await this.categoryRepository.findOneBy({ id: id });
     if (!category) {
@@ -99,6 +104,7 @@ export class SubCategoryService {
     return this.repository.findBy({ category: { id: category.id } });
   }
 
+  // Update a sub-category while preserving the inherited tax logic.
   async updateSubCategory(
     id: number,
     input: UpdateSubCategoryInput
@@ -181,6 +187,6 @@ export class SubCategoryService {
     subCategory.taxApplicability = nextTaxApplicability;
     subCategory.tax = nextTax;
 
-    return await this.repository.save(subCategory);
+    return this.repository.save(subCategory);
   }
 }

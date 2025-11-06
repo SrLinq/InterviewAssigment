@@ -5,6 +5,7 @@ import { Category } from "../database/entity/category.entity";
 const categoryService = new CategoryService();
 export const categoryRouter = express.Router();
 
+// Convert the database model into the shape exposed by the API.
 const toResponse = (category: Category) => ({
   id: category.id,
   name: category.name,
@@ -15,6 +16,7 @@ const toResponse = (category: Category) => ({
   taxType: category.taxType ?? null,
 });
 
+// Allow users to locate categories by id or name.
 categoryRouter.get("/search", async (req, res, next) => {
   try {
     const { id: rawId, name: rawName } = req.query;
@@ -49,6 +51,7 @@ categoryRouter.get("/search", async (req, res, next) => {
   }
 });
 
+// Retrieve the full list of categories.
 categoryRouter.get("/", async (req, res, next) => {
   try {
     const categories = await categoryService.getCategories();
@@ -58,6 +61,7 @@ categoryRouter.get("/", async (req, res, next) => {
   }
 });
 
+// Update a single category by identifier.
 categoryRouter.put("/:id", async (req, res, next) => {
   try {
     const id = Number(req.params.id);
@@ -72,6 +76,7 @@ categoryRouter.put("/:id", async (req, res, next) => {
   }
 });
 
+// Create a brand-new category record.
 categoryRouter.post("/", async (req, res, next) => {
   try {
     const category = await categoryService.createCategory(req.body);

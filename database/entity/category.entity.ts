@@ -5,6 +5,7 @@ import { BaseEntity } from "./baseEntity";
 
 @Entity({ name: "category" })
 export class Category extends BaseEntity {
+  // Human readable attributes for grouping menu items.
   @Column({ type: "varchar", nullable: false })
   name: string;
 
@@ -14,6 +15,7 @@ export class Category extends BaseEntity {
   @Column({ type: "text", nullable: true })
   description?: string;
 
+  // Tax configuration cascades to sub-categories and products by default.
   @Column({ type: "boolean", default: false })
   taxApplicability: boolean;
 
@@ -23,6 +25,7 @@ export class Category extends BaseEntity {
   @Column({ type: "varchar", nullable: true })
   taxType?: string;
 
+  // Children maintained via inverse relations for eager loading.
   @OneToMany(() => Product, (product) => product.category)
   products: Product[];
 

@@ -12,6 +12,7 @@ import { BaseEntity } from "./baseEntity";
 
 @Entity({ name: "subCategory" })
 export class SubCategory extends BaseEntity {
+  // Descriptive metadata for representing the sub-category in the UI.
   @Column({ type: "varchar", nullable: false })
   name: string;
 
@@ -21,6 +22,7 @@ export class SubCategory extends BaseEntity {
   @Column({ type: "text", nullable: true })
   description?: string;
 
+  // Tax settings default to the parent category if not provided explicitly.
   @Column({ type: "boolean", default: false })
   taxApplicability: boolean;
 
@@ -30,6 +32,7 @@ export class SubCategory extends BaseEntity {
   @OneToMany(() => Product, (product) => product.subCategory)
   products: Product[];
 
+  // Every sub-category must belong to a category.
   @ManyToOne(() => Category, (category) => category.subCategories, {
     nullable: false,
   })

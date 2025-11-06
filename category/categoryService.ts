@@ -18,10 +18,12 @@ export class CategoryService {
     this.repository = AppDataSource.getRepository(Category);
   }
 
+  // Fetch every category without additional filtering.
   async getCategories(): Promise<Category[]> {
     return this.repository.find();
   }
 
+  // Update a category while guarding against invalid or empty values.
   async updateCategory(
     id: number,
     input: CreateCategoryInput
@@ -81,6 +83,7 @@ export class CategoryService {
     return this.repository.save(category);
   }
 
+  // Persist a new category, copying optional fields only when they are provided.
   async createCategory(input: CreateCategoryInput): Promise<Category> {
     const name = input.name?.trim();
     if (!name) {
@@ -111,10 +114,12 @@ export class CategoryService {
     });
   }
 
+  // Locate a category by id for search endpoints.
   async searchById(id: number): Promise<Category | null> {
     return this.repository.findOne({ where: { id } });
   }
 
+  // Locate a category by name so the router can handle string-based lookups.
   async searchByName(name: string): Promise<Category | null> {
     return this.repository.findOne({ where: { name } });
   }

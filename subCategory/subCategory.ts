@@ -16,6 +16,7 @@ export interface SubCategoryResponse {
 const subCategoryService = new SubCategoryService();
 export const subCategoryRouter = express.Router();
 
+// Standardise API payloads so callers never see TypeORM internals.
 const toResponse = (subCategory: SubCategory): SubCategoryResponse => ({
   id: subCategory.id,
   name: subCategory.name,
@@ -26,6 +27,7 @@ const toResponse = (subCategory: SubCategory): SubCategoryResponse => ({
   categoryId: subCategory.categoryId ?? subCategory.category?.id ?? null,
 });
 
+// List every sub-category regardless of parent.
 subCategoryRouter.get("/", async (_req, res, next) => {
   try {
     const subCategories = await subCategoryService.getSubCategories();
@@ -35,6 +37,7 @@ subCategoryRouter.get("/", async (_req, res, next) => {
   }
 });
 
+// Retrieve all sub-categories that belong to a category id.
 subCategoryRouter.get(
   "/category/:categoryId",
   async (req, res, next) => {
@@ -60,6 +63,7 @@ subCategoryRouter.get(
   }
 );
 
+// Search sub-categories by either id or name.
 subCategoryRouter.get("/search", async (req, res, next) => {
   try {
     const rawId = Array.isArray(req.query.id) ? req.query.id[0] : req.query.id;
@@ -98,6 +102,7 @@ subCategoryRouter.get("/search", async (req, res, next) => {
 });
 
 
+// Update an existing sub-category.
 subCategoryRouter.put("/:id", async (req, res, next) => {
   try {
     const id = Number(req.params.id);
@@ -115,6 +120,7 @@ subCategoryRouter.put("/:id", async (req, res, next) => {
   }
 });
 
+// Create a new sub-category under a category.
 subCategoryRouter.post("/", async (req, res, next) => {
   try {
     const subCategory = await subCategoryService.createSubCategory(req.body);
