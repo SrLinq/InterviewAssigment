@@ -6,8 +6,12 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "start:dev":"nodemon dist/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start:dev": "nodemon dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli",
+    "typeorm:run-migrations": "npm run typeorm migration:run -- -d ./typeOrm.config.ts",
+    "typeorm:generate-migration": "npm run typeorm -- -d ./typeOrm.config.ts migration:generate ./migrations/$npm_config_name",
+    "typeorm:create-migration": "npm run typeorm -- migration:create ./migrations/$npm_config_name"
   },
   "keywords": [],
   "author": "",
@@ -15,9 +19,12 @@
   "packageManager": "pnpm@10.18.3",
   "devDependencies": {
     "@types/express": "^5.0.5",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "nodemon": "^3.1.10",
     "pg": "^8.16.3",

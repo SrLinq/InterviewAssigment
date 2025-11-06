@@ -1,22 +1,37 @@
-import express from 'express'
 
-const app =express()
+import express, { Request, Response, NextFunction } from "express";
+import dotenv from "dotenv";
+import { AppDataSource } from "./database/data-source";
+import { categoryRouter } from "./category/category";
+import { subCategoryRouter } from "./subCategory/subCategory";
+import { productRouter } from "./product/product";
 
-app.post('/start',function(req,res){
-   res.end("kek")
-})
-app.post("/category")
-app.post("/subcategory")
-app.post("/product")
+dotenv.config();
 
-app.put("/category")
-app.put("/subCategory")
-app.put("/product")
+const app = express();
+app.use(express.json());
 
-app.get("/subCategory")
-app.get("/category")
-app.get("/product")
+app.use("/category", categoryRouter);
+app.use("/subcategory", subCategoryRouter);
+app.use("/product", productRouter);
 
-app.get("/search")
+app.use(
+  (error: unknown, _req: Request, res: Response, _next: NextFunction) => {
+    const message =
+      error instanceof Error ? error.message : "Unexpected server error";
+    res.status(400).json({ error: message });
+  }
+);
 
-app.listen(3000)
+const port = process.env.PORT ? Number(process.env.PORT) : 3000;
+
+AppDataSource.initialize()
+  .then(() => {
+    app.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
+    });
+  })
+  .catch((error) => {
+    console.error("Failed to initialize database connection", error);
+    process.exit(1);
+  });
