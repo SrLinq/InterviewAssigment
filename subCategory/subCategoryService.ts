@@ -12,6 +12,15 @@ export interface CreateSubCategoryInput {
   tax?: number;
 }
 
+export interface UpdateSubCategoryInput {
+  name?: string;
+  categoryId?: number;
+  image?: string;
+  description?: string;
+  taxApplicability?: boolean;
+  tax?: number;
+}
+
 export class SubCategoryService {
   private readonly repository: Repository<SubCategory>;
   private readonly categoryRepository: Repository<Category>;
@@ -69,5 +78,109 @@ export class SubCategoryService {
       tax,
       category,
     });
+  }
+  async getSubCategories(): Promise<SubCategory[]>{
+    return await this.repository.find()
+  }
+
+    async searchById(id: number): Promise<SubCategory | null> {
+    return await this.repository.findOne({ where: { id } });
+  }
+
+  async searchByName(name: string): Promise<SubCategory | null> {
+    return await this.repository.findOne({ where: { name } });
+  }
+  async searchByCategory(id: number): Promise<SubCategory[] | null> {
+    const category = await this.categoryRepository.findOneBy({ id: id });
+    if (!category) {
+      return null;
+    }
+
+    return this.repository.findBy({ category: { id: category.id } });
+  }
+
+  async updateSubCategory(
+    id: number,
+    input: UpdateSubCategoryInput
+  ): Promise<SubCategory> {
+    const subCategory = await this.repository.findOne({
+      where: { id },
+      relations: ["category"],
+    });
+
+    if (!subCategory) {
+      throw new Error("Sub-category not found");
+    }
+
+    let category = subCategory.category;
+
+    if (input.categoryId !== undefined) {
+      const nextCategory = await this.categoryRepository.findOne({
+        where: { id: input.categoryId },
+      });
+
+      if (!nextCategory) {
+        throw new Error("Category not found");
+      }
+
+      category = nextCategory;
+      subCategory.category = nextCategory;
+    }
+
+    if (input.name !== undefined) {
+      const trimmedName = input.name.trim();
+      if (!trimmedName) {
+        throw new Error("Name cannot be empty");
+      }
+      subCategory.name = trimmedName;
+    }
+
+    if (input.image !== undefined) {
+      const trimmedImage = input.image.trim();
+      subCategory.image = trimmedImage || undefined;
+    }
+
+    if (input.description !== undefined) {
+      const trimmedDescription = input.description.trim();
+      subCategory.description = trimmedDescription || undefined;
+    }
+
+    const nextTaxApplicability =
+      input.taxApplicability !== undefined
+        ? input.taxApplicability
+        : subCategory.taxApplicability ?? category.taxApplicability;
+
+    let nextTax =
+      input.tax !== undefined
+        ? Number(input.tax)
+        : subCategory.tax !== undefined && subCategory.tax !== null
+        ? subCategory.tax
+        : category.tax;
+
+    if (input.tax !== undefined) {
+      if (!Number.isFinite(nextTax) || nextTax < 0) {
+        throw new Error("Tax must be a non-negative number");
+      }
+    } else if (nextTax !== undefined && nextTax !== null) {
+      const parsedTax = Number(nextTax);
+      if (!Number.isFinite(parsedTax) || parsedTax < 0) {
+        throw new Error("Tax must be a non-negative number");
+      }
+      nextTax = parsedTax;
+    }
+
+    if (!nextTaxApplicability) {
+      nextTax = undefined;
+    } else if (nextTax === undefined || nextTax === null) {
+      nextTax = category.tax;
+      if (nextTax === undefined || nextTax === null) {
+        throw new Error("Tax is required when taxApplicability is true");
+      }
+    }
+
+    subCategory.taxApplicability = nextTaxApplicability;
+    subCategory.tax = nextTax;
+
+    return await this.repository.save(subCategory);
   }
 }
