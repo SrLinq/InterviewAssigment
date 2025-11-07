@@ -2,6 +2,7 @@ import express from "express";
 import { SubCategoryService } from "./subCategoryService";
 import type { UpdateSubCategoryInput } from "./subCategoryService";
 import { SubCategory } from "../database/entity/subCategory.entity";
+import { sendErrorResponse } from "../utils/sendErrorResponse";
 
 export interface SubCategoryResponse {
   id: number;
@@ -28,19 +29,19 @@ const toResponse = (subCategory: SubCategory): SubCategoryResponse => ({
 });
 
 // List every sub-category regardless of parent.
-subCategoryRouter.get("/", async (_req, res, next) => {
+subCategoryRouter.get("/", async (_req, res) => {
   try {
     const subCategories = await subCategoryService.getSubCategories();
     res.json(subCategories.map(toResponse));
   } catch (error) {
-    next(error);
+    sendErrorResponse(res, error);
   }
 });
 
 // Retrieve all sub-categories that belong to a category id.
 subCategoryRouter.get(
   "/category/:categoryId",
-  async (req, res, next) => {
+  async (req, res) => {
     try {
       const categoryId = Number(req.params.categoryId);
       if (Number.isNaN(categoryId)) {
@@ -58,13 +59,13 @@ subCategoryRouter.get(
 
       res.json(subCategories.map(toResponse));
     } catch (error) {
-      next(error);
+      sendErrorResponse(res, error);
     }
   }
 );
 
 // Search sub-categories by either id or name.
-subCategoryRouter.get("/search", async (req, res, next) => {
+subCategoryRouter.get("/search", async (req, res) => {
   try {
     const rawId = Array.isArray(req.query.id) ? req.query.id[0] : req.query.id;
     const rawName = Array.isArray(req.query.name)
@@ -97,13 +98,13 @@ subCategoryRouter.get("/search", async (req, res, next) => {
 
     res.json(toResponse(subCategory));
   } catch (error) {
-    next(error);
+    sendErrorResponse(res, error);
   }
 });
 
 
 // Update an existing sub-category.
-subCategoryRouter.put("/:id", async (req, res, next) => {
+subCategoryRouter.put("/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
     if (Number.isNaN(id)) {
@@ -116,16 +117,16 @@ subCategoryRouter.put("/:id", async (req, res, next) => {
     );
     res.json(toResponse(subCategory));
   } catch (error) {
-    next(error);
+    sendErrorResponse(res, error);
   }
 });
 
 // Create a new sub-category under a category.
-subCategoryRouter.post("/", async (req, res, next) => {
+subCategoryRouter.post("/", async (req, res) => {
   try {
     const subCategory = await subCategoryService.createSubCategory(req.body);
     res.status(201).json(toResponse(subCategory));
   } catch (error) {
-    next(error);
+    sendErrorResponse(res, error);
   }
 });

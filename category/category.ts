@@ -1,6 +1,7 @@
 import express from "express";
 import { CategoryService } from "./categoryService";
 import { Category } from "../database/entity/category.entity";
+import { sendErrorResponse } from "../utils/sendErrorResponse";
 
 const categoryService = new CategoryService();
 export const categoryRouter = express.Router();
@@ -17,7 +18,7 @@ const toResponse = (category: Category) => ({
 });
 
 // Allow users to locate categories by id or name.
-categoryRouter.get("/search", async (req, res, next) => {
+categoryRouter.get("/search", async (req, res) => {
   try {
     const { id: rawId, name: rawName } = req.query;
 
@@ -47,22 +48,22 @@ categoryRouter.get("/search", async (req, res, next) => {
 
     res.json(toResponse(category));
   } catch (error) {
-    next(error);
+    sendErrorResponse(res, error);
   }
 });
 
 // Retrieve the full list of categories.
-categoryRouter.get("/", async (req, res, next) => {
+categoryRouter.get("/", async (req, res) => {
   try {
     const categories = await categoryService.getCategories();
     res.json(categories.map(toResponse));
   } catch (error) {
-    next(error);
+    sendErrorResponse(res, error);
   }
 });
 
 // Update a single category by identifier.
-categoryRouter.put("/:id", async (req, res, next) => {
+categoryRouter.put("/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
     if (Number.isNaN(id)) {
@@ -72,16 +73,16 @@ categoryRouter.put("/:id", async (req, res, next) => {
     const category = await categoryService.updateCategory(id, req.body);
     res.json(toResponse(category));
   } catch (error) {
-    next(error);
+    sendErrorResponse(res, error);
   }
 });
 
 // Create a brand-new category record.
-categoryRouter.post("/", async (req, res, next) => {
+categoryRouter.post("/", async (req, res) => {
   try {
     const category = await categoryService.createCategory(req.body);
     res.status(201).json(toResponse(category));
   } catch (error) {
-    next(error);
+    sendErrorResponse(res, error);
   }
 });

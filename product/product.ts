@@ -1,6 +1,7 @@
 import express from "express";
 import { ProductService } from "./productService";
 import { Product } from "../database/entity/porductEntity.entity";
+import { sendErrorResponse } from "../utils/sendErrorResponse";
 
 export interface ProductResponse {
   id: number;
@@ -35,7 +36,7 @@ const toResponse = (product: Product): ProductResponse => ({
 });
 
 // Return all products that belong to a given category id.
-productRouter.get("/search/category", async (req, res, next) => {
+productRouter.get("/search/category", async (req, res) => {
   try {
     const rawIdParam = Array.isArray(req.query.id)
       ? req.query.id[0]
@@ -58,12 +59,12 @@ productRouter.get("/search/category", async (req, res, next) => {
 
     res.json(result.map(toResponse));
   } catch (error) {
-    next(error);
+    sendErrorResponse(res, error);
   }
 });
 
 // Return all products assigned to a specific sub-category.
-productRouter.get("/search/subCategory", async (req, res, next) => {
+productRouter.get("/search/subCategory", async (req, res) => {
   try {
     const rawIdParam = Array.isArray(req.query.id)
       ? req.query.id[0]
@@ -86,11 +87,11 @@ productRouter.get("/search/subCategory", async (req, res, next) => {
 
     res.json(result.map(toResponse));
   } catch (error) {
-    next(error);
+    sendErrorResponse(res, error);
   }
 });
 
-productRouter.get("/search", async (req, res, next) => {
+productRouter.get("/search", async (req, res) => {
   try {
     const { id: rawId, name: rawName } = req.query;
 
@@ -120,12 +121,12 @@ productRouter.get("/search", async (req, res, next) => {
 
     res.json(toResponse(product));
   } catch (error) {
-    next(error);
+    sendErrorResponse(res, error);
   }
 });
 
 // Modify an existing product and return the updated representation.
-productRouter.put("/:id", async (req, res, next) => {
+productRouter.put("/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
     if (Number.isNaN(id)) {
@@ -135,26 +136,26 @@ productRouter.put("/:id", async (req, res, next) => {
     const product = await productService.updateProduct(id, req.body);
     res.json(toResponse(product));
   } catch (error) {
-    next(error);
+    sendErrorResponse(res, error);
   }
 });
 
 // Fetch the complete catalog of products.
-productRouter.get("/", async (req, res, next) => {
+productRouter.get("/", async (req, res) => {
   try {
     const products = await productService.getProducts();
     res.json(products.map(toResponse));
   } catch (error) {
-    next(error);
+    sendErrorResponse(res, error);
   }
 });
 
 // Create a new product entry.
-productRouter.post("/", async (req, res, next) => {
+productRouter.post("/", async (req, res) => {
   try {
     const product = await productService.createProduct(req.body);
     res.status(201).json(toResponse(product));
   } catch (error) {
-    next(error);
+    sendErrorResponse(res, error);
   }
 });
